@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
-      name: deploy
+      name: testpypi
       url: https://test.pypi.org/p/<package-name>
 
     permissions:
