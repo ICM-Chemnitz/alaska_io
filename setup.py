@@ -1,8 +1,9 @@
 from setuptools import setup
 
 setup(
+   use_scm_version=True,
+   setup_requires=['setuptools_scm'],
    name='alaska_io',
-   version='0.1.3',
    author='Carsten Schubert',
    author_email='c.schubert@icm-chemnitz.de',
    packages=['alaska_io'],
