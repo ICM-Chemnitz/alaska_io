@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<IFM:data name="alaska" xmlns:IFM="http://www.icm-chemnitz.de">
+	<!-- 19-May-2026 14:16:10 -->
+	<TABLE		 name = "BatchControl"
+		 type = "STRING"
+		 cols = "4"
+		 rows = "0"
+		 head = " 'Lc_Id'  'Active'  'Model_Name'  'Batch_Name' "
+		 colTypes = " 'ID'  'SELECT'  'FILE'  'STRING' "
+		 colDescriptions = " 'Loadcases ID'  'Shows whether Loadcase is active or not [yes/no]'  'alaska model file to be used by the Loadcase'  'Name of the Task (or Batch) in your model, which has to be executed for this Loadcase' ">

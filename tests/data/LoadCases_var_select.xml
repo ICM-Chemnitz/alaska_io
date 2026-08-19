@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<IFM:data name="alaska" xmlns:IFM="http://www.icm-chemnitz.de">
+	<!-- 26-Jun-2026 12:03:45 -->
+	<TABLE		 name = "BatchControl"
+		 type = "STRING"
+		 cols = "4"
+		 rows = "1"
+		 head = " 'Lc_Id'  'Active'  'Model_Name'  'Batch_Name' "
+		 colTypes = " 'ID'  'SELECT'  'FILE'  'STRING' "
+		 colDescriptions = " 'Loadcases ID'  'Shows whether Loadcase is active or not [yes/no]'  'alaska model file to be used by the Loadcase'  'Name of the Task (or Batch) in your model, which has to be executed for this Loadcase' ">
+				LC1  	yes  	../Models/Rotor.xml  	ACM  
+	</TABLE>
+	<TABLE		 name = "Loadcase Description"
+		 type = "STRING"
+		 cols = "3"
+		 rows = "1"
+		 head = " 'Lc_Id'  'LC_Name'  'LC_Description' "
+		 colTypes = " 'ID'  'STRING'  'STRING' "
+		 colDescriptions = " 'Loadcases ID'  'Name of the Loadcase'  'Description of the Loadcase' ">
+				LC1  	Lc_1  	'ConstantWind, rated wind speed'  
+	</TABLE>
+	<TABLE		 name = "Simulation Control"
+		 type = "STRING"
+		 cols = "5"
+		 rows = "1"
+		 head = " 'Lc_Id'  'TStart'  'TEnd'  'TStep'  'TOutput' "
+		 units = " '-'  's'  's'  's'  's' "
+		 colTypes = " 'ID'  'REAL'  'REAL'  'REAL'  'REAL' "
+		 colDescriptions = " 'Loadcases ID'  'Simulation start time'  'Simulation end time'  'Output time step'  'Time to start writing output' ">
+				LC1  	0  	10  	0.01  	0  
+	</TABLE>
+	<TABLE		 name = "File Inputs"
+		 type = "STRING"
+		 cols = "3"
+		 rows = "1"
+		 head = " 'Lc_Id'  'TransientWind_File'  'Turb_File' "
+		 colTypes = " 'ID'  'STRING'  'STRING' "
+		 colDescriptions = " 'Loadcases ID'  'Relative (to Modelfile) Filepath to a transient wind description file'  'Relative (to Modelfile) Filepath to a turbulent wind description file' ">
+				LC1  	None  	None  
+	</TABLE>
+	<TABLE		 name = "Turbine Configuration"
+		 type = "STRING"
+		 cols = "13"
+		 rows = "1"
+		 head = " 'Lc_Id'  'HubLock'  'PitchError1'  'PitchError2'  'PitchError3'  'PitchFixed'  'MassScaleFactorBlade1'  'MassScaleFactorBlade2'  'MassScaleFactorBlade3'  'Gravity'  'IsGravity'  'IsTiltAngle'  'ConstrainRotorRotation' "
+		 units = " ''  '-'  'deg'  'deg'  'deg'  '-'  '-'  '-'  '-'  '-'  '-'  '-'  '-' "
+		 colTypes = " 'STRING'  'SELECT'  'REAL'  'REAL'  'REAL'  'SELECT'  'REAL'  'REAL'  'REAL'  'REAL'  'SELECT'  'SELECT'  'SELECT' "
+		 colDescriptions = " 'Loadcases ID'  'Activate rotor lock [ON/OFF]'  ''  ''  ''  'fix pitch on IC values[ON/OFF]'  ''  ''  ''  ''  'Gravity [ON/OFF]'  'set tilt angle [ON/OFF]'  'constrain rotor omega [ON/OFF]' ">
+				LC1  	OFF  	0.3  	0  	-0.1  	ON  	1.005  	1  	0.997  	-9.80665  	ON  	OFF  	ON  
+	</TABLE>
+	<TABLE		 name = "Turbine Initial Conditions"
+		 type = "STRING"
+		 cols = "7"
+		 rows = "1"
+		 head = " 'Lc_Id'  'OmegaIC'  'PitchIC'  'RotorIC'  'YawIC'  'MSoll_IC'   SomeSwitch"
+		 units = " '-'  'rpm'  'deg'  'deg'  'deg'  'Nm'   -"
+		 colTypes = " 'ID'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'   SELECT"
+		 colDescriptions = " 'Loadcases ID'  'Initial condition of generator speed'  'Initial condition of pitch angle (blades)'  'Initial condition of rotor angle'  'Initial condition of yaw angle (nacelle)'  'Initial condition of generator torque'   [switch1/'fancy switch 2']">
+				LC1  	4  	7  	0  	0  	0  	'fancy switch 2'  
+	</TABLE>
+	<TABLE		 name = "Aerodynamics Control"
+		 type = "STRING"
+		 cols = "9"
+		 rows = "1"
+		 head = " 'Lc_Id'  'WindForceSwitch'  'MeanWindType'  'WindShearModel'  'WindTowerShadow'  'WindWakeModel'  'Stall'  'Gust_Model'  'EvalStepTime' "
+		 units = " ''  ''  ''  ''  ''  ''  ''  ''  's' "
+		 colTypes = " 'ID'  'SELECT'  'SELECT'  'SELECT'  'SELECT'  'SELECT'  'SELECT'  'SELECT'  'REAL' "
+		 colDescriptions = " 'Loadcases ID'  'Compute aerodynamic forces [ON/OFF]'  'kind of mean wind calculation [Constant/Gust/Table]'  'kind of shear wind gradient calculation [NoShear/Logarithmic/Exponential/Constant_Horizontal/Transient_Horizontal/Transient_Vertical/Table_Vertical]'  'kind of tower shadow calculation [Potential/Deformed/Gonzales/OFF]'  'kind of wind wake calculation [None/Equilibrium/Equilibrium_II/Equilibrium_Flex/Dynamic_GDW/Dynamic_ADI/Dynamic_Flex]'  'kind of stall calculation [None/Dynamic_Beddoes/Dynamic_Oye]'  'kind of wind gust calculation [None/IEC_ExtremeOperating/IEC_ExtremeCoherent/YawOnly]'  'Time interval for aerodynamic calculations.' ">
+				LC1  	ON  	Constant  	Exponential  	Potential  	Dynamic_Flex  	Dynamic_Beddoes  	None  	0.01  
+	</TABLE>
+	<TABLE		 name = "Aerodynamics Parameter"
+		 type = "STRING"
+		 cols = "14"
+		 rows = "1"
+		 head = " 'Lc_Id'  'MeanWindSpeed'  'ShearExponent'  'WindYaw'  'WindSlope'  'Turb_UScale'  'Turb_VScale'  'Turb_WScale'  'Gust_TStart'  'Gust_TEnd'  'Gust_TStep'  'Gust_Speed'  'Gust_Yaw'  'AirDensity' "
+		 units = " '-'  'm/s'  '-'  'deg'  'deg'  '-'  '-'  '-'  's'  's'  's'  'm/s'  'deg'  '-' "
+		 colTypes = " 'ID'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL' "
+		 colDescriptions = " 'Loadcases ID'  'mean wind speed'  'parameter for gradient calculation in case of exponential model (dafault=0.2)'  'yaw wind deviation'  'slope wind deviation'  'scale factor for turb-file data (U-direction)'  'scale factor for turb-file data (V-direction)'  'scale factor for turb-file data (W-direction)'  'start time of modeled gust'  'end time of modeled gust'  'duration of modeled gust'  'added gust speed'  'alteration of direction in choosen gust model'  '' ">
+				LC1  	14  	0.2  	0  	-8  	1  	1  	1  	0  	0  	0  	0  	0  	1.225  
+	</TABLE>
+	<TABLE		 name = "Rotor Parameter"
+		 type = "STRING"
+		 cols = "6"
+		 rows = "1"
+		 head = " 'Lc_Id'  'HubHeight'  'RotorOverhang'  'TiltAngle'  'BladeRadialPosition'  'BladeConeAngle' "
+		 units = " ''  '-'  '-'  'deg'  '-'  'deg' "
+		 colTypes = " 'STRING'  'REAL'  'REAL'  'REAL'  'REAL'  'REAL' "
+		 colDescriptions = " 'Loadcases ID'  ''  ''  ''  ''  '' ">
+				LC1  	140  	5  	5  	2.5  	2  
+	</TABLE>
+</IFM:data>
