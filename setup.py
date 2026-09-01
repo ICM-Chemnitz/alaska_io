@@ -8,7 +8,7 @@ setup(
    author_email='c.schubert@icm-chemnitz.de',
    packages=['alaska_io'],
    url='https://github.com/ICM-Chemnitz/alaska_io',
-   license='CC-BY-NC-4.0 License',
+   license_files = ('LICENSE',)
    description='Alaska IO Python Package',
    long_description=open('README.md').read(),
    install_requires=['numpy','h5py'],
