@@ -392,7 +392,9 @@ def get_variable_names(parameter_set_file) -> list:
 
     return list(dict.fromkeys(var_names))
 
-def find_parameter_set_variable(parameter_set_file, variable_name: str) -> (int, int):
+def find_parameter_set_variable(
+    parameter_set_file, variable_name: str
+) -> tuple[list[int], list[int]]:
     """
     Find parameter set variable (column) in parameter_set_file tables.
 
@@ -405,16 +407,16 @@ def find_parameter_set_variable(parameter_set_file, variable_name: str) -> (int,
 
     Returns
     -------
-    tuple (table_ind, column_ind) 
-        index of table containing variable and index of column of variable in corresponding table
+    tuple (table_inds, column_inds)
+        Parallel lists of table and column indices for every matching variable.
     """
 
-    table_ind = None
-    column_ind = None
+    table_inds = []
+    column_inds = []
 
     if ' ' in variable_name:
         print(f'parameter set variables must not have spaces: find_variable "{variable_name}"')
-        return None, None
+        return table_inds, column_inds
 
     for ti, table in enumerate(parameter_set_file.tables):
 
@@ -437,30 +439,30 @@ def find_parameter_set_variable(parameter_set_file, variable_name: str) -> (int,
             no_cols = table["no_cols"]
         except (TypeError, ValueError):
             print(f"Invalid no_cols in table {table.get('Name')}")
-            return None, None
+            return [], []
 
         if len(heads) != no_cols:
             print(f'error in parsing head attribute of table {table.get("Name")}')
-            return None, None
+            return [], []
 
         # --- search variable
         for ci, h in enumerate(heads):
             if variable_name == h:
-                table_ind = ti 
-                column_ind = ci 
+                table_inds.append(ti)
+                column_inds.append(ci)
 
                 print(
                     f'found variable {variable_name} in table with name = "{table.get("Name")}"'
                 )
                 print(
-                    f"index of table: {table_ind} index of column: {column_ind}"
+                    f"index of table: {ti} index of column: {ci}"
                 )
             
-    if table_ind == None and column_ind == None:
+    if not table_inds:
         print(f"Variable with name {variable_name} can not be found in parameter set file")
 
 
-    return table_ind, column_ind
+    return table_inds, column_inds
 
 
 def delete_parameter_set_variable(parameter_set_file, variable_name: str):
@@ -482,9 +484,9 @@ def delete_parameter_set_variable(parameter_set_file, variable_name: str):
         manipulated parameter set file
     """
 
-    table_ind, col_ind = find_parameter_set_variable(parameter_set_file , variable_name)
+    table_inds, col_inds = find_parameter_set_variable(parameter_set_file, variable_name)
     
-    if table_ind is not None and col_ind is not None:
+    for table_ind, col_ind in sorted(zip(table_inds, col_inds), reverse=True):
         table = parameter_set_file[table_ind]
         # --- update counters
         no_rows = table["no_rows"]
@@ -520,7 +522,7 @@ def delete_parameter_set_variable(parameter_set_file, variable_name: str):
         table["Content"] = np.delete(content, col_ind, axis=1)
 
 
-        return parameter_set_file    
+    return parameter_set_file
         
 
 
@@ -552,8 +554,8 @@ def add_parameter_set_variable(parameter_set_file, table_name: str, variable_nam
     parameter_set_file
     """
 
-    table_ind, col_ind = find_parameter_set_variable(parameter_set_file, variable_name)
-    if table_ind != None or col_ind != None:
+    table_inds, _ = find_parameter_set_variable(parameter_set_file, variable_name)
+    if table_inds:
         print(f'Variable with name {variable_name} already found in parameter set file - can not be added')
 
 
@@ -651,8 +653,8 @@ def add_parameter_set_select_variable(parameter_set_file, table_name: str, varia
     variable_type = "SELECT"
     unit = "-"
     
-    table_ind, col_ind = find_parameter_set_variable(parameter_set_file, variable_name)
-    if table_ind != None or col_ind != None:
+    table_inds, _ = find_parameter_set_variable(parameter_set_file, variable_name)
+    if table_inds:
         print(f'Variable with name {variable_name} already found in parameter set file - can not be added')
 
 
@@ -739,11 +741,12 @@ def get_parameter_data_set_variable(parameter_set_file, variable_name: str, para
 
     Returns
     -------
-    str or numpy.ndarray[str]
+    str, numpy.ndarray[str], or list[str | numpy.ndarray[str]]
+        A list is returned when the variable exists in multiple tables.
     """
 
     # --- find variable location
-    table_ind, col_ind = find_parameter_set_variable(parameter_set_file, variable_name)
+    table_inds, col_inds = find_parameter_set_variable(parameter_set_file, variable_name)
 
     # --- find dataset row
     row_ind = 0     # change first parameter data set , if parameter_data_set_id is None
@@ -751,30 +754,29 @@ def get_parameter_data_set_variable(parameter_set_file, variable_name: str, para
         _, row_ind = parameter_set_file.get_parameter_data_set_by_id(parameter_data_set_id)
 
     # --- check indices
-    #content = []
-    if row_ind != None and col_ind != None and table_ind != None:
-
-        table = parameter_set_file.tables[table_ind]
-        table_content = table["Content"]
-        if parameter_data_set_id is None:
-            content = table_content[:, col_ind] 
-        else: 
-            content = table_content[row_ind, col_ind] 
-
-    else:
+    if row_ind is None or not table_inds:
         print(
             f'variable {variable_name} which should be changed for '
             f'parameter data set ID {parameter_data_set_id} was not found'
         )
+        return None
 
-    return content
+    content = []
+    for table_ind, col_ind in zip(table_inds, col_inds):
+        table_content = parameter_set_file.tables[table_ind]["Content"]
+        if parameter_data_set_id is None:
+            content.append(table_content[:, col_ind])
+        else:
+            content.append(table_content[row_ind, col_ind])
+
+    return content[0] if len(content) == 1 else content
     
     
 def set_parameter_data_set_variable_value(parameter_set_file, variable_name: str, variable_value, parameter_data_set_id : str = None):
     """
     Set value of a variable in a specific parameter dataset.
-    - If parameter_data_set_id is None and variable_value is scalar , the variable is changed in the first parameter data set (top-row of each table)
-    - If parameter_data_set_id is None and variable_value is not scalar, the values will be put in variable column (if len() does match)
+    - If parameter_data_set_id is None and variable_value is scalar, the variable is changed in the first parameter data set of every matching table.
+    - If parameter_data_set_id is None and variable_value is not scalar, the values will be put in every matching variable column when the length matches.
 
     Parameters
     ----------
@@ -799,7 +801,7 @@ def set_parameter_data_set_variable_value(parameter_set_file, variable_name: str
         return parameter_set_file
 
     # --- find variable location
-    table_ind, col_ind = find_parameter_set_variable(parameter_set_file, variable_name)
+    table_inds, col_inds = find_parameter_set_variable(parameter_set_file, variable_name)
 
     # --- find dataset row
     row_ind = 0     # change first parameter data set , if parameter_data_set_id is None
@@ -807,20 +809,19 @@ def set_parameter_data_set_variable_value(parameter_set_file, variable_name: str
         _, row_ind = parameter_set_file.get_parameter_data_set_by_id(parameter_data_set_id)
 
     # --- check indices
-    if row_ind != None and col_ind != None and table_ind != None:
+    if row_ind is not None and table_inds:
+        for table_ind, col_ind in zip(table_inds, col_inds):
+            table = parameter_set_file.tables[table_ind]
+            content = table["Content"]
 
-        table = parameter_set_file.tables[table_ind]
-        content = table["Content"]
-
-        if np.isscalar(variable_value):
-            content[row_ind, col_ind] = str(variable_value)
-        elif len(variable_value) == table["no_rows"]: 
-        
-            col_data_str = [str(v) for v in variable_value]
-            col_array = np.array(col_data_str, dtype=object).reshape(table["no_rows"], 1)
-            content[:, col_ind] = col_array[:,0]
-        else: 
-            print(f"length of {variable_value} does not fit size of table {table['no_rows']}")
+            if np.isscalar(variable_value):
+                content[row_ind, col_ind] = str(variable_value)
+            elif len(variable_value) == table["no_rows"]:
+                col_data_str = [str(v) for v in variable_value]
+                col_array = np.array(col_data_str, dtype=object).reshape(table["no_rows"], 1)
+                content[:, col_ind] = col_array[:, 0]
+            else:
+                print(f"length of {variable_value} does not fit size of table {table['no_rows']}")
             
 
     else:
